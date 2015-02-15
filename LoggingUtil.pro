@@ -12,11 +12,11 @@ DESTDIR  = $$PWD/test
 
 SOURCES += main.cpp\
            mainWindow.cpp \
-           loggingUtil.cpp \
-           spamer.cpp
+           spamer.cpp \
+    LoggingField.cpp
 
 HEADERS  += mainWindow.h \
-            loggingUtil.h \
-            spamer.h
+            spamer.h \
+    LoggingField.h
 
 FORMS    += mainWindow.ui

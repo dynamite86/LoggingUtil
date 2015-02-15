@@ -1,3 +1,10 @@
+﻿/*************************************************************************
+File encoding: UTF-8.
+
+Модуль для генерации и отправки сигналов с текстовыми сообщениями с интервалом 10...500мс.
+Автор: dynamite, 2015.
+*************************************************************************/
+
 #include "spamer.h"
 
 Spamer::Spamer(QObject *parent) : QObject(parent){}
@@ -24,24 +31,13 @@ bool Spamer::readFile(const QString &filePath)
     return true;
 }
 
-
 void SpamerThreadedProcessing::m_spamingStart()
 {
-    QString buffer;
-    QFile sourceFile(m_filePath);
-    QTextDecoder decoder(QTextCodec::codecForName("UTF-8"));
-
-    sourceFile.open(QIODevice::ReadOnly|QIODevice::Text);
-    if((!sourceFile.isOpen())||(!sourceFile.isReadable()))
+    srand(QTime().msecsTo(QTime::currentTime()));
+    m_file.open(QIODevice::ReadOnly|QIODevice::Text);
+    while(!m_file.atEnd())
     {
-        sourceFile.close();
-        return;
-    }
-
-    while(!sourceFile.atEnd())
-    {
-        buffer.clear();
-        buffer = decoder.toUnicode(sourceFile.readLine());
+        QString buffer = QTextDecoder(QTextCodec::codecForName("UTF-8")).toUnicode(m_file.readLine());
         if(buffer.contains("\n"))
         {
             buffer.remove("\n");
@@ -51,19 +47,23 @@ void SpamerThreadedProcessing::m_spamingStart()
             buffer.remove("\r");
         }
         logOutputSignal(buffer);
+        Sleep((rand()%500 + 10));
     }
-    sourceFile.close();
+    m_file.close();
+    signalSpamingIsComplete();
     return;
 }
 
 SpamerThreadedProcessing::SpamerThreadedProcessing(QObject *parent) : QObject(parent){}
+
 SpamerThreadedProcessing::~SpamerThreadedProcessing(){}
 
 bool SpamerThreadedProcessing::initSpaming(const QString &filePath)
 {
-    if(filePath.isEmpty()){
+    if(filePath.isEmpty())
+    {
         return false;
     }
-    m_filePath = filePath;
+    m_file.setFileName(filePath);
     return true;
 }

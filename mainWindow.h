@@ -1,10 +1,10 @@
-#ifndef MAINWINDOW_H
+﻿#ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
 #include <QtCore>
 #include <QtWidgets>
 #include <QtGui>
-#include "loggingUtil.h"
+#include "LoggingField.h"
 #include "spamer.h"
 
 namespace Ui {
@@ -20,13 +20,10 @@ public:
     ~mainWindow();
 
 private slots:
-    void m_slotLog(QString message);
     void on_pushButton_start_clicked();
-
 
 private:
     Ui::mainWindow *ui;
-    loggingUtil    *m_loggingUtil;
     Spamer         *m_spamer;
 
 };

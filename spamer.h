@@ -1,14 +1,22 @@
+﻿/*************************************************************************
+File encoding: UTF-8.
+
+Модуль для генерации и отправки сигналов с текстовыми сообщениями с интервалом 10...500мс.
+Автор: dynamite, 2015.
+*************************************************************************/
+
 #ifndef SPAMER_H
 #define SPAMER_H
 
 #include <QtCore>
+#include <windows.h>
 
 class SpamerThreadedProcessing : public QObject
 {
     Q_OBJECT
 
 private:
-    QString m_filePath;
+    QFile m_file;
 
 private slots:
     void m_spamingStart();
