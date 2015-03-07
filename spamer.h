@@ -16,7 +16,10 @@ class SpamerThreadedProcessing : public QObject
     Q_OBJECT
 
 private:
+
     QFile m_file;
+    int m_minDelay;
+    int m_maxDelay;
 
 private slots:
     void m_spamingStart();
@@ -25,11 +28,11 @@ public:
     explicit SpamerThreadedProcessing(QObject *parent = 0);
     ~SpamerThreadedProcessing();
 
-    bool initSpaming(const QString &filePath);
+    bool initSpaming(const QString &filePath, int minDelay, int maxDelay);
 
 signals:
     void signalSpamingIsComplete();
-    void logOutputSignal(QString msg);
+    void logOutputSignal(const bool errorMsg = false, const QString msg = QString());
 };
 
 class Spamer : public QObject
@@ -43,10 +46,11 @@ public:
     explicit Spamer(QObject *parent = 0);
     ~Spamer();
 
-    bool readFile(const QString &filePath);
+public slots:
+    bool start(const QString &filePath, const int minDelay, const int maxDelay);
 
 signals:
-    void logOutputSignal(QString msg);
+    void logOutputSignal(const bool errorMsg = false, const QString msg = QString());
 };
 
 #endif // SPAMER_H

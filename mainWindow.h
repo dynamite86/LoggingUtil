@@ -21,6 +21,7 @@ public:
 
 private slots:
     void on_pushButton_start_clicked();
+    void on_dial_msgBufferSize_valueChanged(int value);
 
 private:
     Ui::mainWindow *ui;

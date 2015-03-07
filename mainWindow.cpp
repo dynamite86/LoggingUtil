@@ -6,9 +6,11 @@ mainWindow::mainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::mainWi
     ui->setupUi(this);
 
     m_spamer = new Spamer;
-    connect(m_spamer, SIGNAL(logOutputSignal(QString)), ui->textEdit, SLOT(append(QString)));
-    connect(ui->spinBox_refreshInterval, SIGNAL(valueChanged(int)), ui->textEdit, SLOT(setRefreshInterval(int)));
-    ui->textEdit->setRefreshInterval(ui->spinBox_refreshInterval->value());
+    connect(m_spamer,               SIGNAL(logOutputSignal(bool,QString)), ui->textEdit, SLOT(addMessage(bool,QString)));
+    connect(ui->dial_msgBufferSize, SIGNAL(valueChanged(int)),             ui->textEdit, SLOT(setMsgBufferSize(int)));
+
+    ui->label_msgBufferSize->setText(QString("%1 msg").arg(ui->dial_msgBufferSize->value()));
+    ui->textEdit->setMsgBufferSize(ui->dial_msgBufferSize->value());
 }
 
 mainWindow::~mainWindow()
@@ -19,5 +21,12 @@ mainWindow::~mainWindow()
 
 void mainWindow::on_pushButton_start_clicked()
 {
-    m_spamer->readFile("./text.txt");
+    ui->textEdit->clear();
+    m_spamer->start("./text.txt", ui->spinBox_minimumDelay->value(), ui->spinBox_maximumDelay->value());
+}
+
+void mainWindow::on_dial_msgBufferSize_valueChanged(int value)
+{
+    ui->label_msgBufferSize->setText(QString("%1 msg").arg(value));
+    ui->textEdit->setMsgBufferSize(ui->dial_msgBufferSize->value());
 }

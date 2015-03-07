@@ -1,7 +1,7 @@
 ﻿/*************************************************************************
 File encoding: UTF-8.
 
-Модуль для генерации и отправки сигналов с текстовыми сообщениями с интервалом 10...500мс.
+Модуль для генерации и отправки сигналов с текстовыми сообщениями.
 Автор: dynamite, 2015.
 *************************************************************************/
 
@@ -10,10 +10,10 @@ File encoding: UTF-8.
 Spamer::Spamer(QObject *parent) : QObject(parent){}
 Spamer::~Spamer(){}
 
-bool Spamer::readFile(const QString &filePath)
+bool Spamer::start(const QString &filePath, const int minDelay, const int maxDelay)
 {
     m_spamerThread = new SpamerThreadedProcessing(NULL);
-    if(!m_spamerThread->initSpaming(filePath))
+    if(!m_spamerThread->initSpaming(filePath, minDelay, maxDelay))
     {
         delete m_spamerThread;
         return false;
@@ -25,7 +25,8 @@ bool Spamer::readFile(const QString &filePath)
     connect(threadForProcessing, SIGNAL(finished()),                threadForProcessing, SLOT(deleteLater()));
     connect(m_spamerThread,      SIGNAL(signalSpamingIsComplete()), m_spamerThread,      SLOT(deleteLater()));
     connect(m_spamerThread,      SIGNAL(signalSpamingIsComplete()), threadForProcessing, SLOT(quit()));
-    connect(m_spamerThread,      SIGNAL(logOutputSignal(QString)),  this,                SIGNAL(logOutputSignal(QString)));
+
+    connect(m_spamerThread, SIGNAL(logOutputSignal(bool,QString)), this, SIGNAL(logOutputSignal(bool,QString)));
 
     threadForProcessing->start();
     return true;
@@ -46,8 +47,8 @@ void SpamerThreadedProcessing::m_spamingStart()
         {
             buffer.remove("\r");
         }
-        logOutputSignal(buffer);
-        Sleep((rand()%500 + 10));
+        logOutputSignal(false, buffer);
+        Sleep((rand()%m_maxDelay + m_minDelay));
     }
     m_file.close();
     signalSpamingIsComplete();
@@ -58,12 +59,15 @@ SpamerThreadedProcessing::SpamerThreadedProcessing(QObject *parent) : QObject(pa
 
 SpamerThreadedProcessing::~SpamerThreadedProcessing(){}
 
-bool SpamerThreadedProcessing::initSpaming(const QString &filePath)
+bool SpamerThreadedProcessing::initSpaming(const QString &filePath, int minDelay, int maxDelay)
 {
     if(filePath.isEmpty())
     {
         return false;
     }
     m_file.setFileName(filePath);
+    m_minDelay = minDelay;
+    m_maxDelay = maxDelay;
     return true;
 }
+

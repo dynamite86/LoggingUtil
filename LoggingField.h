@@ -12,25 +12,20 @@ File encoding: UTF-8.
 class LoggingField : public QTextEdit
 {
     Q_OBJECT
-protected:
-    void paintEvent(QPaintEvent *event);
 
 private:
-    bool m_needRefreshFlag;
-    QTimer *m_refreshTimer;
-    int m_refreshInterval;
-    Q_PROPERTY(int refreshInterval READ refreshInterval WRITE setRefreshInterval MEMBER m_refreshInterval)
-
-private slots:
-    void m_timerShot();
-
-public slots:
-    int refreshInterval() const;
-    void setRefreshInterval(const int interval);
+    QStringList m_messagesBuffer;
+    int m_msgBufferSize;
+    Q_PROPERTY(int msgBufferSize READ msgBufferSize WRITE setMsgBufferSize MEMBER m_msgBufferSize)
 
 public:
     explicit LoggingField(QWidget *parent = 0);
     ~LoggingField();
+
+public slots:
+    void addMessage(const bool errorMsg = false, const QString &text = QString());
+    int msgBufferSize() const;
+    void setMsgBufferSize(const int size);
 };
 
 #endif // LOGGINGFIELD_H

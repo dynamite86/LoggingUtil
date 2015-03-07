@@ -4,57 +4,45 @@ File encoding: UTF-8.
 
 #include "LoggingField.h"
 
-void LoggingField::paintEvent(QPaintEvent *event)
+int LoggingField::msgBufferSize() const
 {
-    if(m_needRefreshFlag)
+    return m_msgBufferSize;
+}
+
+void LoggingField::setMsgBufferSize(const int size)
+{
+    if(size >= 1)
     {
-        event->accept();
-        m_needRefreshFlag = false;
-    }
-}
-
-void LoggingField::m_timerShot()
-{
-    m_needRefreshFlag = true;
-    this->update();
-}
-
-LoggingField::LoggingField(QWidget *parent) : QTextEdit(parent)
-{
-    m_refreshInterval = 10;
-    m_needRefreshFlag = false;
-
-    m_refreshTimer = new QTimer;
-    connect(m_refreshTimer, SIGNAL(timeout()), this, SLOT(m_timerShot()));
-
-    m_refreshTimer->setInterval(1000*m_refreshInterval);
-    m_refreshTimer->start();
-}
-
-LoggingField::~LoggingField()
-{
-    if(m_refreshTimer->isActive())
-    {
-        m_refreshTimer->stop();
-    }
-    delete m_refreshTimer;
-}
-
-int LoggingField::refreshInterval() const
-{
-    return m_refreshInterval;
-}
-
-void LoggingField::setRefreshInterval(const int interval)
-{
-    if((interval > 0)&&(interval != m_refreshInterval))
-    {
-        m_refreshInterval = interval;
-        m_refreshTimer->setInterval(1000*m_refreshInterval);
-        if(m_refreshTimer->isActive())
+        if(size != m_msgBufferSize)
         {
-            m_refreshTimer->stop();
+            if(size >= m_messagesBuffer.size()) //сброс сообщений в текстовое поле, в случае уменьшения размера буфера,
+                                                //в т.ч. на случай, если после уменьшения размера сообщения поступать не будут
+            {
+                this->append(m_messagesBuffer.join("\n"));
+                m_messagesBuffer.clear();
+            }
+            m_msgBufferSize = size;
         }
-        m_refreshTimer->start();
     }
 }
+
+void LoggingField::addMessage(const bool errorMsg, const QString &text)
+{
+    if(m_messagesBuffer.size() >= m_msgBufferSize)
+    {
+        this->append(m_messagesBuffer.join("\n"));
+        m_messagesBuffer.clear();
+    }
+
+    if(errorMsg)
+    {
+        m_messagesBuffer.append("<font color=red>"   + text + "</font>");
+    }
+    else
+    {
+        m_messagesBuffer.append("<font color=black>" + text + "</font>");
+    }
+}
+
+LoggingField::LoggingField(QWidget *parent) : QTextEdit(parent){}
+LoggingField::~LoggingField(){}
